@@ -1,108 +1,335 @@
-# Txt-Search-Engine
-📖 Introducere și Descriere
-Txt-Search-Engine este o aplicație modernă, dezvoltată integral în limbajul C++ (standard C++17), având ca scop principal indexarea rapidă și căutarea eficientă a informațiilor textuale dintr-o colecție de documente locale.
+# Txt Search Engine
 
-Spre deosebire de metodele tradiționale de căutare secvențială (care parcurg fiecare fișier linie cu linie), acest proiect implementează o arhitectură bazată pe Indexare Inversată (Inverted Index). Această abordare permite interogarea bazei de date în timp real  O(1), indiferent de volumul total al documentelor procesate.
+Aplicație de tip **motor de căutare pentru fișiere `.txt`**, realizată în **C++17** pentru proiectul de Programare Orientată pe Obiecte. Programul încarcă documente text dintr-un director local, construiește un **index inversat** și permite căutarea rapidă a cuvintelor, afișând documentele în care apar, frecvența aparițiilor și un scurt context.
 
-🎯 Obiectivele Proiectului
+## Cuprins
 
--Performanță Maximă: Utilizarea structurilor de date eficiente (std::unordered_map) pentru a minimiza timpul de răspuns la căutări.
+- [Descriere](#descriere)
+- [Funcționalități](#funcționalități)
+- [Tehnologii folosite](#tehnologii-folosite)
+- [Structura proiectului](#structura-proiectului)
+- [Arhitectură](#arhitectură)
+- [Diagramă UML](#diagramă-uml)
+- [Compilare și rulare](#compilare-și-rulare)
+- [Ghid de utilizare](#ghid-de-utilizare)
+- [Persistența datelor](#persistența-datelor)
+- [Concepte POO folosite](#concepte-poo-folosite)
+- [Exemplu flux de lucru](#exemplu-flux-de-lucru)
+- [Autor](#autor)
 
--Experiență Utilizator (UX) Superioară: Crearea unei interfețe tip TUI (Text User Interface) care oferă feedback vizual instantaneu, navigare ușoară și o prezentare modernă a datelor, fără a depinde de librării externe.
+## Descriere
 
--Persistență: Capacitatea de a salva și încărca starea indexului, permițând utilizatorului să păstreze rezultatele prelucrării între sesiuni diferite.
+`Txt Search Engine` este o aplicație de consolă care indexează o colecție de documente locale și oferă o interfață interactivă pentru căutarea termenilor în acele documente.
 
-️Abordarea Tehnică
+În loc să parcurgă fiecare fișier la fiecare căutare, aplicația construiește un **index inversat**: fiecare cuvânt normalizat este asociat cu documentele în care apare și cu frecvența aparițiilor. Astfel, căutările devin mai eficiente după etapa de indexare.
 
-Proiectul este structurat modular, respectând principiile Programării Orientate pe Obiecte (POO):
-Core-ul Motorului (Index & Document): Se ocupă de tokenizarea textului, normalizarea cuvintelor și construirea dicționarului inversat care asociază fiecare termen unic cu lista documentelor în care apare.
+Aplicația include și o interfață TUI simplă, cu meniu navigabil din tastatură, culori ANSI, bară de progres, istoric de operații și salvarea listei de documente indexate într-un fișier local.
 
-Interfața Utilizatorului (ConsoleUI & Terminal): Gestionează interacțiunea cu utilizatorul prin manipularea directă a bufferului terminalului (termios), permițând capturarea tastelor speciale (săgeți, ESC) și redarea dinamică a interfeței (bare de progres, evidențiere culori).
-Gestiunea Datelor: Utilizează librăria <filesystem> din C++17 pentru iterarea recursivă a directoarelor și manipularea sigură a căilor de fișiere.
+## Funcționalități
 
-💡 De ce acest proiect?
+- Încărcarea automată a fișierelor `.txt` din directorul `documente/`.
+- Construirea unui index inversat pe baza cuvintelor din documente.
+- Normalizarea cuvintelor prin conversie la litere mici și eliminarea semnelor de punctuație.
+- Ignorarea unor cuvinte comune, precum stopwords în română și engleză.
+- Căutarea unui cuvânt în documentele indexate.
+- Sortarea rezultatelor după frecvența aparițiilor în document.
+- Afișarea unui scurt context pentru primul rezultat găsit în fiecare document.
+- Sugestie de corectare pentru cuvinte apropiate, folosind distanța Levenshtein.
+- Afișarea statisticilor despre documente și cuvinte indexate.
+- Afișarea topului celor mai frecvente cuvinte după numărul de documente în care apar.
+- Istoric de operații salvat în `istoric_operatii.txt`.
+- Listă cu ultimele căutări efectuate în sesiunea curentă.
+- Schimbarea temei de culoare din interfață.
+- Salvarea și încărcarea bazei de date locale `search_index.db`.
 
-Această aplicație demonstrează puterea limbajului C++ în manipularea rapidă a fluxurilor mari de date text și arată cum pot fi implementate algoritmi complecși de sortare și căutare într-un mediu "low-level", obținând o aplicație rapidă, stabilă și portabilă
+## Tehnologii folosite
 
-✨ Funcționalități Principale
+- **C++17**
+- **STL**: `vector`, `string`, `unordered_map`, `unordered_set`, `map`, `memory`
+- **Filesystem API**: citirea fișierelor din directorul `documente/`
+- **Programare orientată pe obiecte**
+- **Makefile** pentru compilare
+- **ANSI escape codes** și `termios` pentru interfața din terminal
 
-🔍 Căutare Full-Text: Găsește cuvinte în timp real într-o bază de date mare de documente.
+## Structura proiectului
 
-📈 Algoritm de Relevanță: Sortează rezultatele bazându-se pe frecvența cuvântului căutat în fiecare document.
+```text
+.
+├── ConsoleUI.cpp / ConsoleUI.h      # Interfața utilizatorului și meniul principal
+├── Document.cpp / Document.h        # Încărcarea, stocarea și tokenizarea documentelor
+├── Index.cpp / Index.h              # Indexul inversat și logica de căutare
+├── Terminal.cpp / Terminal.h        # Funcții pentru terminal: raw mode, taste speciale, cursor
+├── main.cpp                         # Punctul de intrare al aplicației
+├── Makefile                         # Reguli pentru compilare și rulare
+├── documente/                       # Directorul cu fișiere .txt de indexat
+├── search_index.db                  # Fișier pentru salvarea listei de documente indexate
+└── istoric_operatii.txt             # Istoricul operațiilor efectuate
+```
 
-🎨 Interfață TUI Avansată: Meniu interactiv în consolă, suport pentru săgeți, culori și teme personalizabile.
+## Arhitectură
 
-🔦 Evidențiere Context: Afișează propoziția în care apare cuvântul căutat, cu diacritice corecte.
+Proiectul este împărțit în clase cu responsabilități clare:
 
-💾 Persistență: Salvează indexul în baza de date (search_index.db) pentru a evita re-indexarea la fiecare rulare.
+### `Document`
 
-📂 Suport C++17: Utilizează <filesystem> și <chrono> pentru manipularea fișierelor și performanță.
+Reprezintă un document text. Clasa se ocupă de:
 
-📊 Statistici Live: Vizualizarea numărului de documente, cuvinte indexate și istoricul căutărilor.
-Ghid de Utilizare (User Guide)
+- citirea conținutului din fișier;
+- tokenizarea textului în cuvinte;
+- păstrarea conținutului și a listei de cuvinte;
+- extragerea unui context în jurul unui cuvânt găsit.
 
-# Compilare și Rulare
-Asigură-te că ai g++ (versiunea 11+) și make instalate.
-# Clonează repository-ul
-git clone https://github.com/NUMELE_TAU/Txt-Search-Engine.git
-cd Txt-Search-Engine
+### `Index`
 
-# Compilează proiectul
-make
+Reprezintă motorul de indexare și căutare. Clasa se ocupă de:
 
-# Rulează aplicația
-./search_engine
+- administrarea documentelor încărcate;
+- construirea indexului inversat;
+- normalizarea cuvintelor;
+- eliminarea stopwords;
+- căutarea termenilor;
+- sortarea rezultatelor după frecvență;
+- salvarea și încărcarea listei de documente;
+- calcularea cuvântului apropiat prin distanța Levenshtein.
 
-# Fluxul de Lucru
+### `ConsoleUI`
 
-1)Încarcă documente: Plasează fișierele .txt în folderul documente/ și selectează opțiunea 1.
+Gestionează interacțiunea cu utilizatorul. Clasa se ocupă de:
 
-2)Construiește index: Selectează opțiunea 2. Se va crea baza de date internă.
+- afișarea meniului principal;
+- încărcarea documentelor;
+- pornirea indexării;
+- rularea căutărilor;
+- afișarea statisticilor;
+- gestionarea istoricului;
+- schimbarea temei de culoare;
+- afișarea informațiilor despre aplicație.
 
-3)Caută: Selectează opțiunea 3 și tastează cuvântul dorit.
+### `Terminal`
 
-4)Salvează: Selectează opțiunea 5 pentru a salva progresul. Data viitoare, apasă 6 pentru a încărca direct.
+Conține funcții utilitare pentru lucrul cu terminalul:
 
-# Navigare în Interfață
+- activarea și dezactivarea modului raw;
+- citirea tastelor speciale;
+- curățarea ecranului;
+- ascunderea și afișarea cursorului;
+- tratarea semnalelor de întrerupere.
 
-↑ / ↓ : Navigare meniu
+## Diagramă UML
 
-Enter : Selectare opțiune
-
-T : Schimbare temă culori (Cyan / Blue / Green)
-
-# 🏗️ Arhitectură și Tehnologie
+Diagrama de mai jos prezintă clasele principale ale aplicației și relațiile dintre ele:
 
 ```mermaid
 classDiagram
-    class Main {
-        +main() int
+    class Document {
+        -string filePath
+        -string content
+        -vector~string~ words
+        +Document()
+        +Document(path: string)
+        +loadFromFile() bool
+        +getFilePath() string
+        +getContent() string
+        +getWords() vector~string~
+        +tokenize() void
+        +getContext(position: size_t, radius: size_t) string
     }
+
+    class WordOccurrence {
+        +string filePath
+        +size_t frequency
+        +vector~size_t~ positions
+        +WordOccurrence(path: string)
+    }
+
+    class Index {
+        -unordered_map~string, vector~WordOccurrence~~ invertedIndex
+        -vector~unique_ptr~Document~~ documents
+        -unordered_set~string~ stopwords
+        -normalizeWord(word: string) string
+        -isStopword(word: string) bool
+        -loadStopwords() void
+        -levenshteinDistance(a: string, b: string) int
+        +Index()
+        +~Index()
+        +addDocument(doc: Document*) void
+        +buildIndex() void
+        +search(query: string) vector~pair~string, size_t~~
+        +getDocuments() vector~Document*~
+        +clear() void
+        +saveToFile(filename: string) bool
+        +loadFromFile(filename: string) bool
+        +getTopWords(limit: size_t) vector~pair~string, size_t~~
+        +getDocumentCount() size_t
+        +getIndexedWordsCount() size_t
+        +findClosestWord(query: string) string
+    }
+
     class ConsoleUI {
-        -vector~string~ searchHistory
+        -Index index
+        -string directoryPath
+        -string databaseFile
+        -string historyFile
+        -vector~string~ operationHistory
+        -int searchCount
         -string accentColor
+        -map~string, int~ searchStats
+        -vector~string~ savedSearches
+        -clearScreen() void
+        -printHeader() void
+        -renderMenu(selected: int) void
+        -addHistory(operation: string) void
+        -saveHistory() void
+        -loadHistory() void
+        -executeSearchQuery(query: string) void
+        -confirmExit() bool
+        +ConsoleUI()
         +run() void
         +loadDocuments() void
         +buildIndex() void
         +searchDocuments() void
-        +exportResults() void
-    }
-    class Index {
-        -unordered_map~string, vector~DocInfo~~ invertedIndex
-        +addDocument() void
-        +search() vector~pair~
-        +saveToFile() bool
-        +loadFromFile() bool
-    }
-    class Document {
-        -string filePath
-        -vector~string~ words
-        +loadFromFile() bool
-        +getWords() vector~string~
-        +getContext() string
+        +showStatistics() void
+        +saveDatabase() void
+        +loadDatabase() void
+        +showOperationHistory() void
+        +showAbout() void
+        +showPopularWords() void
+        +showSavedSearches() void
+        +refreshMenu() void
     }
 
-    Main --> ConsoleUI
-    ConsoleUI --> Index
-    Index --> Document
+    class Terminal {
+        <<utility>>
+        +enableRawMode() void
+        +disableRawMode() void
+        +readKey() int
+        +clearScreen() void
+        +moveCursor(x: int, y: int) void
+        +hideCursor() void
+        +showCursor() void
+        +setupSignalHandlers() void
+    }
+
+    ConsoleUI *-- Index : conține
+    Index *-- Document : administrează
+    Index o-- WordOccurrence : folosește în index
+    ConsoleUI ..> Terminal : folosește
 ```
+
+Relațiile importante sunt:
+
+- `ConsoleUI` conține un obiect `Index` și coordonează operațiile aplicației.
+- `Index` administrează documentele prin `std::unique_ptr<Document>`.
+- `Index` folosește `WordOccurrence` pentru a memora aparițiile unui cuvânt într-un document.
+- `ConsoleUI` folosește funcțiile utilitare din `Terminal` pentru interfața în consolă.
+
+
+## Compilare și rulare
+
+### Cerințe
+
+Ai nevoie de:
+
+- compilator C++ cu suport pentru C++17, de exemplu `g++`;
+- utilitarul `make`;
+- sistem compatibil cu `termios`, de exemplu Linux sau macOS.
+
+### Compilare
+
+```bash
+make
+```
+
+### Rulare
+
+```bash
+./search_engine
+```
+
+### Curățarea fișierelor generate
+
+```bash
+make clean
+```
+
+### Compilare și rulare rapidă
+
+```bash
+make run
+```
+
+## Ghid de utilizare
+
+La pornire, aplicația afișează meniul principal. Navigarea se face cu tastele:
+
+```text
+↑ / ↓   Navigare prin meniu
+Enter   Selectarea opțiunii curente
+T       Schimbarea temei de culoare
+```
+
+Opțiunile disponibile în meniu sunt:
+
+| Opțiune | Descriere |
+| --- | --- |
+| 1 | Încarcă documente din directorul `documente/` |
+| 2 | Construiește indexul inversat |
+| 3 | Caută un cuvânt în documente |
+| 4 | Afișează statistici despre sistem |
+| 5 | Salvează baza de date locală |
+| 6 | Încarcă baza de date locală |
+| 7 | Afișează istoricul operațiilor |
+| 8 | Schimbă tema de culori |
+| 9 | Afișează informații despre aplicație |
+| 10 | Afișează cel mai căutat cuvânt din sesiune |
+| 11 | Afișează căutările salvate în sesiunea curentă |
+| 12 | Reafișează meniul |
+| 0 | Ieșire din aplicație |
+
+## Persistența datelor
+
+Aplicația folosește două fișiere pentru păstrarea datelor între rulări:
+
+- `search_index.db` — salvează lista documentelor încărcate. La încărcare, documentele sunt citite din nou, iar indexul este reconstruit.
+- `istoric_operatii.txt` — salvează ultimele operații efectuate de utilizator.
+
+La pornire, dacă fișierul `search_index.db` există, aplicația încearcă să încarce automat documentele salvate anterior.
+
+## Concepte POO folosite
+
+Proiectul folosește următoarele concepte de Programare Orientată pe Obiecte:
+
+- **Încapsulare**: datele interne ale claselor sunt private și accesate prin metode publice.
+- **Abstracție**: fiecare clasă ascunde detaliile de implementare și expune operații clare.
+- **Compoziție**: `ConsoleUI` conține un obiect `Index`, iar `Index` administrează obiecte `Document`.
+- **Separarea responsabilităților**: fiecare clasă are un rol distinct în aplicație.
+- **Gestionarea resurselor**: documentele sunt administrate prin `std::unique_ptr`, reducând riscul scurgerilor de memorie.
+
+## Exemplu flux de lucru
+
+1. Adaugă fișiere `.txt` în directorul `documente/`.
+2. Rulează aplicația:
+
+   ```bash
+   ./search_engine
+   ```
+
+3. Alege opțiunea **1** pentru încărcarea documentelor.
+4. Alege opțiunea **2** pentru construirea indexului.
+5. Alege opțiunea **3** și introdu cuvântul căutat.
+6. Consultă rezultatele afișate: document, frecvență și context.
+7. Alege opțiunea **5** pentru salvarea bazei de date.
+
+## Observații
+
+- Căutarea funcționează pe cuvinte individuale, nu pe fraze complete.
+- Fișierele indexate trebuie să aibă extensia `.txt`.
+- Directorul implicit pentru documente este `documente/`.
+- Cuvintele comune definite ca stopwords nu sunt indexate.
+- Sugestiile de corectare apar doar dacă există un cuvânt apropiat în index.
+
+## Autor
+
+**Podlisnic Marius**
+
+Proiect realizat în C++ pentru disciplina Programare Orientată pe Obiecte.
